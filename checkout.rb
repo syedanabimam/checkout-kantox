@@ -1,20 +1,22 @@
 require_relative 'pricing_rules_config'
 
 class Checkout
-  def initialize(pricing_rules = PRICING_RULES)
+  def initialize(pricing_rules = PricingRulesConfig::PRICING_RULES)
     @pricing_rules = pricing_rules
     @items = []
   end
 
   def scan(item)
-    @items << item
+    items << item
   end
 
   def total
-    apply(@items, @pricing_rules)
+    apply(items, pricing_rules)
   end
 
   private
+
+  attr_reader :pricing_rules, :items
 
   def apply(items, pricing_rules)
     grouped_items = items.tally
