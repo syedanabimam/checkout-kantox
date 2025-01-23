@@ -41,9 +41,10 @@ class MainCLI
     puts '1. View items and prices'
     puts '2. View pricing rules'
     puts '3. Scan an item'
-    puts '4. Show total'
-    puts '5. Reset checkout'
-    puts '6. Exit'
+    puts '4. Search items by name'
+    puts '5. Show total'
+    puts '6. Reset checkout'
+    puts '7. Exit'
     print 'Enter your choice: '
   end
 
@@ -58,10 +59,12 @@ class MainCLI
     when '3'
       scan_item_loop
     when '4'
-      show_total
+      search_items_by_name
     when '5'
-      reset_checkout
+      show_total
     when '6'
+      reset_checkout
+    when '7'
       exit_program
     else
       puts 'Invalid choice. Please try again.'
@@ -103,6 +106,28 @@ class MainCLI
         puts 'Invalid item code. Please try again or type "menu" to go back.'
       end
     end
+  end
+
+  def search_items_by_name
+    print 'Enter part of the item name to search: '
+    query = gets.chomp.strip.downcase
+    available_items = [
+      { code: 'GR1', name: 'Green Tea', price: 3.11 },
+      { code: 'SR1', name: 'Strawberries', price: 5.00 },
+      { code: 'CF1', name: 'Coffee', price: 11.23 }
+    ]
+    results = available_items.select do |item|
+      item[:name].downcase.include?(query)
+    end
+    if results.any?
+      puts 'Matching items:'
+      results.each do |item|
+        puts "#{item[:code]} | #{item[:name]} | £#{'%.2f' % item[:price]}"
+      end
+    else
+      puts 'No items found matching your query.'
+    end
+    puts
   end
 
   def show_total
