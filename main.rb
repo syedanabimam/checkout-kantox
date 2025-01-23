@@ -94,16 +94,25 @@ class MainCLI
 
   def scan_item_loop
     loop do
+      puts "1. Back to menu | 2. View items | 3. View pricing rules"
       print 'Enter the item code to scan (or type "menu" to go back): '
       input = gets.chomp.strip
 
-      if input.downcase == 'menu'
+      case input.downcase
+      when 'menu', '1'
         return
-      elsif %w[GR1 SR1 CF1].include?(input.upcase)
-        @checkout.scan(input.upcase)
-        puts "Item '#{input.upcase}' scanned successfully."
+      when '2'
+        show_items
+      when '3'
+        show_pricing_rules
       else
-        puts 'Invalid item code. Please try again or type "menu" to go back.'
+        if %w[GR1 SR1 CF1].include?(input.upcase)
+          @checkout.scan(input.upcase)
+          puts "Item '#{input.upcase}' scanned successfully."
+          show_total
+        else
+          puts 'Invalid item code. Please try again or type "menu" to go back.'
+        end
       end
     end
   end
