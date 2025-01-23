@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 require 'minitest/autorun'
+require 'minitest/reporters'
 require_relative 'checkout'
+
+Minitest::Reporters.use!(Minitest::Reporters::SpecReporter.new)
 
 class CheckoutTest < Minitest::Test
   def setup
