@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 require 'minitest/autorun'
+require_relative 'checkout'
 
 class CheckoutTest < Minitest::Test
   def setup
-    @checkout = Checkout.new(pricing_rules)
+    @checkout = Checkout.new(Checkout::PRICING_RULES)
   end
 
   def test_case1
