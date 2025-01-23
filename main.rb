@@ -22,7 +22,16 @@ class MainCLI
   private
 
   def show_intro
-    'This is the CLI to manage Kantox Checkout Os'
+    puts '======================================================'
+    puts 'Welcome to the Kantox Checkout System CLI!'
+    puts '======================================================'
+    puts 'This is how the checkout logic is running in the background:'
+    puts '  co = Checkout.new(PricingRulesConfig::PRICING_RULES)'
+    puts "  co.scan('GR1')"
+    puts "  co.scan('SR1')"
+    puts '  price = co.total'
+    puts '======================================================'
+    puts "Let's get started!"
     puts
     @intro_shown = true
   end
@@ -31,6 +40,7 @@ class MainCLI
     puts 'What would you like to do?'
     puts '1. View items and prices'
     puts '2. View pricing rules'
+    puts '3. Scan an item'
     puts '3. Exit'
     print 'Enter your choice: '
   end
@@ -44,6 +54,8 @@ class MainCLI
     when '2'
       show_pricing_rules
     when '3'
+      scan_item_loop
+    when '4'
       exit_program
     else
       puts 'Invalid choice. Please try again.'
@@ -69,6 +81,22 @@ class MainCLI
     puts '3. Bulk discount on Coffee (CF1) - Price drops to two-thirds of £11.23 each for 3 or more.'
     puts '======================================================'
     puts
+  end
+
+  def scan_item_loop
+    loop do
+      print 'Enter the item code to scan (or type "menu" to go back): '
+      input = gets.chomp.strip
+
+      if input.downcase == 'menu'
+        return
+      elsif %w[GR1 SR1 CF1].include?(input.upcase)
+        @checkout.scan(input.upcase)
+        puts "Item '#{input.upcase}' scanned successfully."
+      else
+        puts 'Invalid item code. Please try again or type "menu" to go back.'
+      end
+    end
   end
 
   def exit_program
