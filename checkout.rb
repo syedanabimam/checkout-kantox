@@ -1,4 +1,10 @@
 class Checkout
+  pricing_rules = {
+    'GR1': gr1_pricing_rule,
+    'SR1': sr1_pricing_rule,
+    'CF1': cf1_pricing_rule
+  }
+
   def initialize(pricing_rules)
     @pricing_rules = pricing_rules
     @items = []
@@ -17,30 +23,30 @@ class Checkout
   attr_reader :pricing_rules, :items
 
   def apply(items, pricing_rules)
-    # tally items count
-    # refer to pricing rules
-    # apply rule to each item
-    # calculate total
+    grouped_items = items.tally
+    total = 0.0
+
+    grouped_items.each do |item, quantity|
+      total += rules[item].call(quantity)
+    end
+
+    total
   end
 
-  def pricing_rules
-    {
-      'GR1': gr1_pricing_rule,
-      'SR1': sr1_pricing_rule,
-      'CF1': cf1_pricing_rule
-    }
-  end
-
-  def gr1_pricing_rule
+  def gr1_pricing_rule(quantity)
     price = 3.11
+    (quantity / 2 + quantity % 2) * price
   end
 
-  def sr1_pricing_rule
-    price = 5.00
+  def sr1_pricing_rule(quantity)
+    price = quantity >= 3 ? 4.50 : 5.00
+    quantity * price
   end
 
-  def cf1_pricing_rule
+  def cf1_pricing_rule(quantity)
     price = 11.23
+    price = (price * 2 / 3.0) if quantity >= 3
+    quantity * price
   end
 end
 
