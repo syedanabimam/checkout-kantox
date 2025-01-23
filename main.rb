@@ -117,7 +117,7 @@ class MainCLI
       { code: 'CF1', name: 'Coffee', price: 11.23 }
     ]
     results = available_items.select do |item|
-      item[:name].downcase.include?(query)
+      item[:name].downcase.include?(query) || item[:code].downcase.include?(query)
     end
     if results.any?
       puts 'Matching items:'
