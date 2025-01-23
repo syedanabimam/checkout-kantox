@@ -22,5 +22,25 @@ class Checkout
     # apply rule to each item
     # calculate total
   end
+
+  def pricing_rules
+    {
+      'GR1': gr1_pricing_rule,
+      'SR1': sr1_pricing_rule,
+      'CF1': cf1_pricing_rule
+    }
+  end
+
+  def gr1_pricing_rule
+    price = 3.11
+  end
+
+  def sr1_pricing_rule
+    price = 5.00
+  end
+
+  def cf1_pricing_rule
+    price = 11.23
+  end
 end
 
