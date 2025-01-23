@@ -41,7 +41,8 @@ class MainCLI
     puts '1. View items and prices'
     puts '2. View pricing rules'
     puts '3. Scan an item'
-    puts '3. Exit'
+    puts '4. Show total'
+    puts '5. Exit'
     print 'Enter your choice: '
   end
 
@@ -56,6 +57,8 @@ class MainCLI
     when '3'
       scan_item_loop
     when '4'
+      show_total
+    when '5'
       exit_program
     else
       puts 'Invalid choice. Please try again.'
@@ -97,6 +100,12 @@ class MainCLI
         puts 'Invalid item code. Please try again or type "menu" to go back.'
       end
     end
+  end
+
+  def show_total
+    total_price = @checkout.total
+    puts "Current total: £#{'%.2f' % total_price}"
+    puts
   end
 
   def exit_program
