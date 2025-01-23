@@ -1,4 +1,5 @@
-The repo is for kantox checkout test
+## About
+The repo is for kantox checkout that is a simple cashier function that adds products to a cart and displays the total price.
 
 ## Testing
 The test suite is written using Minitest.
