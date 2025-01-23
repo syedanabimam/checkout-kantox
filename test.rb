@@ -8,7 +8,7 @@ Minitest::Reporters.use!(Minitest::Reporters::SpecReporter.new)
 
 class CheckoutTest < Minitest::Test
   def setup
-    @checkout = Checkout.new(Checkout::PRICING_RULES)
+    @checkout = Checkout.new(PricingRulesConfig::PRICING_RULES)
   end
 
   def test_case1
