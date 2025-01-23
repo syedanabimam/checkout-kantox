@@ -26,6 +26,7 @@ class Checkout
       total += pricing_rules[item].call(quantity)
     end
 
-    total
+    # Rounding to 2 to ensure the total is in same decimal config as prices
+    total.round(2)
   end
 end
