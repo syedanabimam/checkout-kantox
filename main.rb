@@ -42,7 +42,8 @@ class MainCLI
     puts '2. View pricing rules'
     puts '3. Scan an item'
     puts '4. Show total'
-    puts '5. Exit'
+    puts '5. Reset checkout'
+    puts '6. Exit'
     print 'Enter your choice: '
   end
 
@@ -59,6 +60,8 @@ class MainCLI
     when '4'
       show_total
     when '5'
+      reset_checkout
+    when '6'
       exit_program
     else
       puts 'Invalid choice. Please try again.'
@@ -105,6 +108,12 @@ class MainCLI
   def show_total
     total_price = @checkout.total
     puts "Current total: £#{'%.2f' % total_price}"
+    puts
+  end
+
+  def reset_checkout
+    @checkout = Checkout.new(PricingRulesConfig::PRICING_RULES)
+    puts 'Checkout reset. All scanned items have been cleared.'
     puts
   end
 
