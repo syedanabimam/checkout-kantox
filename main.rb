@@ -8,7 +8,7 @@ class MainCLI
     @checkout = Checkout.new(PricingRulesConfig::PRICING_RULES)
     @running = true
     @intro_displayed = false
-    @custom_items = {} # Stores custom items for the session
+    @custom_items = {}
     @scanned_items = []
   end
 
@@ -279,7 +279,6 @@ class MainCLI
   end
 
   def show_total
-    # Calculate the total using grouped items and custom items
     grouped_items = @scanned_items.group_by { |item| item[:code] }.map do |code, items|
       price_rule = @custom_items.key?(code) ? @custom_items[code][:rule] : @checkout.instance_variable_get(:@pricing_rules)[code]
       {
@@ -293,7 +292,6 @@ class MainCLI
 
     total_price = grouped_items.sum { |item| item[:discounted_price] }
 
-    # Display the items in a tabular format
     puts '======================================================'
     puts 'Items Scanned:'
     puts 'No. | Item Code | Name         | Quantity | Original Price | Discounted Price'
