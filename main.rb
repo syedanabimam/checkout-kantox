@@ -8,6 +8,7 @@ class MainCLI
     @checkout = Checkout.new(PricingRulesConfig::PRICING_RULES)
     @running = true
     @intro_displayed = false
+    @scanned_items = []
   end
 
   def run
@@ -93,9 +94,15 @@ class MainCLI
   end
 
   def scan_item_loop
+    available_items = [
+      { code: 'GR1', name: 'Green Tea', price: 3.11 },
+      { code: 'SR1', name: 'Strawberries', price: 5.00 },
+      { code: 'CF1', name: 'Coffee', price: 11.23 }
+    ]
+
     loop do
       puts "1. Back to menu | 2. View items | 3. View pricing rules"
-      print 'Enter the item code to scan (or type "menu" to go back): '
+      print 'Start typing to search (or type "menu" to go back): '
       input = gets.chomp.strip
 
       case input.downcase
@@ -106,15 +113,40 @@ class MainCLI
       when '3'
         show_pricing_rules
       else
-        if %w[GR1 SR1 CF1].include?(input.upcase)
-          @checkout.scan(input.upcase)
-          puts "Item '#{input.upcase}' scanned successfully."
-          show_total
+        matches = available_items.select do |item|
+          item[:code].downcase.include?(input.downcase) || item[:name].downcase.include?(input.downcase)
+        end
+
+        if matches.empty?
+          puts 'No matching items found. Keep typing or type "menu" to go back.'
         else
-          puts 'Invalid item code. Please try again or type "menu" to go back.'
+          puts 'Matching items:'
+          matches.each_with_index do |item, index|
+            puts "#{index + 1}. #{item[:code]} (#{item[:name]}) - £#{'%.2f' % item[:price]}"
+          end
+          print 'Select item number to add, or refine search: '
+          selection = gets.chomp.strip
+
+          if selection.to_i.between?(1, matches.length)
+            selected_item = matches[selection.to_i - 1]
+            @scanned_items << selected_item
+            @checkout.scan(selected_item[:code])
+            puts "Item '#{selected_item[:name]}' scanned successfully."
+            show_total
+          else
+            puts 'Invalid selection. Keep typing or refine search.'
+          end
         end
       end
     end
+  end
+
+  def item_name(code)
+    {
+      'GR1' => 'Green Tea',
+      'SR1' => 'Strawberries',
+      'CF1' => 'Coffee'
+    }[code]
   end
 
   def search_items_by_name
@@ -141,7 +173,25 @@ class MainCLI
 
   def show_total
     total_price = @checkout.total
-    puts "Current total: £#{'%.2f' % total_price}"
+    grouped_items = @scanned_items.group_by { |item| item[:code] }.map do |code, items|
+      {
+        code: code,
+        name: items.first[:name],
+        quantity: items.size,
+        original_price: items.size * items.first[:price],
+        discounted_price: @checkout.instance_variable_get(:@pricing_rules)[code].call(items.size)
+      }
+    end
+
+    puts '======================================================'
+    puts 'Items Scanned:'
+    puts 'No. | Item Code | Name         | Quantity | Original Price | Discounted Price'
+    grouped_items.each_with_index do |item, index|
+      puts "#{(index + 1).to_s.ljust(3)} | #{item[:code].ljust(9)} | #{item[:name].ljust(12)} | #{item[:quantity].to_s.ljust(8)} | £#{'%.2f' % item[:original_price]}        | £#{'%.2f' % item[:discounted_price]}"
+    end
+    puts '------------------------------------------------------'
+    puts format("Current Total: £%.2f", total_price)
+    puts '======================================================'
     puts
   end
 
