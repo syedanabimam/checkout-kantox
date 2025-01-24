@@ -223,7 +223,7 @@ ruby test.rb
 
 ### Test Cases
 
-The following test cases are included to validate the checkout system:
+The following predefined test cases are included to validate the checkout system:
 
 1. **Test Case 1**:
    - Scans items: `GR1`, `SR1`, `GR1`, `GR1`, `CF1`.
@@ -245,14 +245,21 @@ The following test cases are included to validate the checkout system:
 
 ```plaintext
 CheckoutTest
-  test_case1
-    ✓ test_case1 (0.001s)
-  test_case2
-    ✓ test_case2 (0.000s)
-  test_case3
-    ✓ test_case3 (0.001s)
-  test_case4
-    ✓ test_case4 (0.000s)
+  test_case3                                                      PASS (0.00s)
+  test_single_item                                                PASS (0.00s)
+  test_bulk_discount_cf1                                          PASS (0.00s)
+  test_bulk_discount_sr1                                          PASS (0.00s)
+  test_no_items_scanned                                           PASS (0.00s)
+  test_reset_checkout                                             PASS (0.00s)
+  test_order_independence                                         PASS (0.00s)
+  test_custom_item                                                PASS (0.00s)
+  test_invalid_item                                               PASS (0.00s)
+  test_custom_buy_x_get_y_free                                    PASS (0.00s)
+  test_mix_of_custom_and_predefined_items                         PASS (0.00s)
+  test_case1                                                      PASS (0.00s)
+  test_large_quantity                                             PASS (0.00s)
+  test_case4                                                      PASS (0.00s)
+  test_case2                                                      PASS (0.00s)
 
-Finished in 0.00345s
-4 tests
+Finished in 0.00153s
+15 tests, 15 assertions, 0 failures, 0 errors, 0 skips```
