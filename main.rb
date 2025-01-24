@@ -114,7 +114,7 @@ class MainCLI
     ] + @custom_items.map { |code, details| { code: code, name: details[:name], price: details[:price] } }
 
     loop do
-      puts "1. Back to menu | 2. View items | 3. View pricing rules"
+      puts '1. Back to menu | 2. View items | 3. View pricing rules'
       print 'Start typing to search (or type "menu" to go back): '
       input = gets.chomp.strip
 
@@ -162,7 +162,6 @@ class MainCLI
       end
     end
   end
-
 
   def add_custom_item
     print 'Enter new item code: '
@@ -302,7 +301,7 @@ class MainCLI
       puts "#{(index + 1).to_s.ljust(3)} | #{item[:code].ljust(9)} | #{item[:name].ljust(12)} | #{item[:quantity].to_s.ljust(8)} | £#{'%.2f' % item[:original_price]}        | £#{'%.2f' % item[:discounted_price]}"
     end
     puts '------------------------------------------------------'
-    puts format("Current Total: £%.2f", total_price)
+    puts format('Current Total: £%.2f', total_price)
     puts '======================================================'
     puts
   end
