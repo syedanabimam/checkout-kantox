@@ -23,6 +23,10 @@ class Checkout
     total = 0.0
 
     grouped_items.each do |item, quantity|
+      if pricing_rules[item].nil?
+        raise ArgumentError, "Invalid item code: #{item}"
+      end
+
       total += pricing_rules[item].call(quantity)
     end
 
