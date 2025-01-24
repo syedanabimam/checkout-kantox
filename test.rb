@@ -73,7 +73,8 @@ class CheckoutTest < Minitest::Test
   def test_custom_buy_x_get_y_free
     custom_rule = lambda do |quantity|
       unit_price = 2.0
-      (quantity / 4 * 3 + quantity % 4) * unit_price # Buy 3, Get 1 Free
+      # Buy 3, Get 1 Free
+      (quantity / 4 * 3 + quantity % 4) * unit_price
     end
     @checkout = Checkout.new(PricingRulesConfig::PRICING_RULES.merge('ANAB' => custom_rule))
     6.times { @checkout.scan('ANAB') }
