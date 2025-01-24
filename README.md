@@ -262,4 +262,5 @@ CheckoutTest
   test_case2                                                      PASS (0.00s)
 
 Finished in 0.00153s
-15 tests, 15 assertions, 0 failures, 0 errors, 0 skips```
+15 tests, 15 assertions, 0 failures, 0 errors, 0 skips
+```
