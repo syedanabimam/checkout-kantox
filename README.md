@@ -2,6 +2,17 @@
 
 The repository contains the Kantox Checkout System, a simple cashier-like functionality that allows adding products to a cart, applying pricing rules, and calculating the total price. The system is enhanced with a Command Line Interface (CLI) to make operations seamless for users.
 
+The test file test.rb demonstrates the way it was desired in assessment documentation on how code was supposed to run:
+```BASH
+  # I condensed the Pricing Rules to be lambda functions composed in a hash that lives in a module
+  co = Checkout.new(PricingRulesConfig::PRICING_RULES)
+  co.scan('GR1')
+  co.scan('SR1')
+  price = co.total
+```
+
+For more advanced usage, please explore the documentation below :point_down:
+
 ---
 
 ## Table of Contents
