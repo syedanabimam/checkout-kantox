@@ -8,6 +8,7 @@ class MainCLI
     @checkout = Checkout.new(PricingRulesConfig::PRICING_RULES)
     @running = true
     @intro_displayed = false
+    @custom_items = {} # Stores custom items for the session
     @scanned_items = []
   end
 
@@ -43,9 +44,11 @@ class MainCLI
     puts '2. View pricing rules'
     puts '3. Scan an item'
     puts '4. Search items by name'
-    puts '5. Show total'
-    puts '6. Reset checkout'
-    puts '7. Exit'
+    puts '5. Add a new custom item'
+    puts '6. Remove a custom item'
+    puts '7. Show total'
+    puts '8. Reset checkout'
+    puts '9. Exit'
     print 'Enter your choice: '
   end
 
@@ -62,10 +65,14 @@ class MainCLI
     when '4'
       search_items_by_name
     when '5'
-      show_total
+      add_custom_item
     when '6'
-      reset_checkout
+      remove_custom_item
     when '7'
+      show_total
+    when '8'
+      reset_checkout
+    when '9'
       exit_program
     else
       puts 'Invalid choice. Please try again.'
@@ -79,6 +86,9 @@ class MainCLI
     puts 'GR1       | Green Tea     | £3.11'
     puts 'SR1       | Strawberries  | £5.00'
     puts 'CF1       | Coffee        | £11.23'
+    @custom_items.each do |code, details|
+      puts "#{code.ljust(10)} | #{details[:name].ljust(12)} | £#{'%.2f' % details[:price]}"
+    end
     puts '======================================================'
     puts
   end
@@ -89,6 +99,9 @@ class MainCLI
     puts '1. Buy-one-get-one-free on Green Tea (GR1).'
     puts '2. Bulk discount on Strawberries (SR1) - Price drops to £4.50 each for 3 or more.'
     puts '3. Bulk discount on Coffee (CF1) - Price drops to two-thirds of £11.23 each for 3 or more.'
+    @custom_items.each do |code, details|
+      puts "Custom rule for #{details[:name]} (#{code}): #{details[:rule_description]}"
+    end
     puts '======================================================'
     puts
   end
@@ -98,7 +111,7 @@ class MainCLI
       { code: 'GR1', name: 'Green Tea', price: 3.11 },
       { code: 'SR1', name: 'Strawberries', price: 5.00 },
       { code: 'CF1', name: 'Coffee', price: 11.23 }
-    ]
+    ] + @custom_items.map { |code, details| { code: code, name: details[:name], price: details[:price] } }
 
     loop do
       puts "1. Back to menu | 2. View items | 3. View pricing rules"
@@ -113,6 +126,15 @@ class MainCLI
       when '3'
         show_pricing_rules
       else
+        direct_match = available_items.find { |item| item[:code].casecmp?(input) }
+        if direct_match
+          @scanned_items << direct_match
+          @checkout.scan(direct_match[:code])
+          puts "Item '#{direct_match[:name]}' scanned successfully."
+          show_total
+          next
+        end
+
         matches = available_items.select do |item|
           item[:code].downcase.include?(input.downcase) || item[:name].downcase.include?(input.downcase)
         end
@@ -141,12 +163,98 @@ class MainCLI
     end
   end
 
-  def item_name(code)
-    {
-      'GR1' => 'Green Tea',
-      'SR1' => 'Strawberries',
-      'CF1' => 'Coffee'
-    }[code]
+
+  def add_custom_item
+    print 'Enter new item code: '
+    code = gets.chomp.upcase
+    if @custom_items.key?(code) || %w[GR1 SR1 CF1].include?(code)
+      puts 'Item code already exists. Cannot overwrite existing items.'
+      return
+    end
+
+    print 'Enter item name: '
+    name = gets.chomp
+    print 'Enter item price: '
+    price = gets.chomp.to_f
+
+    puts 'What pricing rule do you want to apply?'
+    puts '1. Buy X, Get Y Free (e.g., Buy 1 Get 1 Free)'
+    puts '2. Bulk discount (Price drops to X if buying Y or more)'
+    puts '3. Bulk discount as fraction (e.g., 2/3 of price if buying Y or more)'
+    print 'Enter your choice: '
+    rule_choice = gets.chomp.to_i
+
+    case rule_choice
+    when 1
+      print 'Enter X (quantity to buy): '
+      buy_quantity = gets.chomp.to_i
+      print 'Enter Y (quantity to get free): '
+      free_quantity = gets.chomp.to_i
+
+      rule_lambda = lambda do |quantity|
+        sets = quantity / (buy_quantity + free_quantity)
+        remaining = quantity % (buy_quantity + free_quantity)
+        (sets * buy_quantity + remaining) * price
+      end
+      rule_description = "Buy #{buy_quantity}, Get #{free_quantity} Free"
+
+    when 2
+      print 'Enter the minimum quantity (Y) to trigger discount: '
+      min_quantity = gets.chomp.to_i
+      print 'Enter the discounted price per item (X): '
+      discounted_price = gets.chomp.to_f
+
+      rule_lambda = lambda do |quantity|
+        if quantity >= min_quantity
+          quantity * discounted_price
+        else
+          quantity * price
+        end
+      end
+      rule_description = "Bulk discount: £#{'%.2f' % discounted_price} each for #{min_quantity} or more"
+
+    when 3
+      print 'Enter the minimum quantity (Y) to trigger discount: '
+      min_quantity = gets.chomp.to_i
+      print 'Enter the fraction of the price (e.g., 0.67 for 2/3): '
+      fraction = gets.chomp.to_f
+
+      rule_lambda = lambda do |quantity|
+        if quantity >= min_quantity
+          quantity * price * fraction
+        else
+          quantity * price
+        end
+      end
+      rule_description = "Bulk discount: #{(fraction * 100).to_i}% of price for #{min_quantity} or more"
+
+    else
+      puts 'Invalid choice for pricing rule. Custom item not added.'
+      return
+    end
+
+    @custom_items[code] = {
+      name: name,
+      price: price,
+      rule_description: rule_description,
+      rule: rule_lambda
+    }
+
+    puts "Custom item '#{name}' with rule '#{rule_description}' added successfully!"
+    @checkout = Checkout.new(@checkout.instance_variable_get(:@pricing_rules).merge(code => rule_lambda))
+    puts
+  end
+
+  def remove_custom_item
+    print 'Enter the code of the custom item to remove: '
+    code = gets.chomp.upcase
+    if @custom_items.delete(code)
+      puts "Custom item '#{code}' removed successfully."
+      @checkout = Checkout.new(PricingRulesConfig::PRICING_RULES.merge(@custom_items.transform_values { |v| v[:rule] }))
+    else
+      puts 'No custom item found with that code.'
+    end
+    puts
   end
 
   def search_items_by_name
@@ -172,17 +280,21 @@ class MainCLI
   end
 
   def show_total
-    total_price = @checkout.total
+    # Calculate the total using grouped items and custom items
     grouped_items = @scanned_items.group_by { |item| item[:code] }.map do |code, items|
+      price_rule = @custom_items.key?(code) ? @custom_items[code][:rule] : @checkout.instance_variable_get(:@pricing_rules)[code]
       {
         code: code,
         name: items.first[:name],
         quantity: items.size,
         original_price: items.size * items.first[:price],
-        discounted_price: @checkout.instance_variable_get(:@pricing_rules)[code].call(items.size)
+        discounted_price: price_rule.call(items.size)
       }
     end
 
+    total_price = grouped_items.sum { |item| item[:discounted_price] }
+
+    # Display the items in a tabular format
     puts '======================================================'
     puts 'Items Scanned:'
     puts 'No. | Item Code | Name         | Quantity | Original Price | Discounted Price'
@@ -197,6 +309,7 @@ class MainCLI
 
   def reset_checkout
     @checkout = Checkout.new(PricingRulesConfig::PRICING_RULES)
+    @scanned_items = []
     puts 'Checkout reset. All scanned items have been cleared.'
     puts
   end
